@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ toggleTheme, isDarkMode }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <h1 className="text-lg sm:text-xl font-serif font-bold text-navy-500 dark:text-gray-50">
-            Vatican Updates
+            Papal Updates
           </h1>
 
           {/* Desktop menu */}

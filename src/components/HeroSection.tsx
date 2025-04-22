@@ -27,7 +27,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isDarkMode }) => {
       <div className="relative z-10 text-center px-4">
         <div className="inline-block bg-white/30 dark:bg-white/10 backdrop-blur-sm px-8 py-6 rounded-2xl shadow-lg">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-navy-500 dark:text-gray-50 mb-3 drop-shadow-[0_4px_3px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_4px_3px_rgba(0,0,0,0.5)]">
-            Vatican Updates
+            Papal Updates
           </h1>
           <p className="text-lg md:text-xl text-navy-400 dark:text-gray-300 max-w-2xl mx-auto drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
             Stay informed with the latest updates from the Vatican
