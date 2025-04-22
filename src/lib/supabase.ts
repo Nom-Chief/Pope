@@ -2,17 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 
 // Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-export const supabase = createClient<Database>(
-  supabaseUrl || '',
-  supabaseAnonKey || ''
-);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
 export type PopeUpdate = Database['public']['Tables']['completed_clips']['Row'];
 
@@ -26,7 +23,7 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
   try {
     const { data, error } = await supabase
       .from('completed_clips')
-      .select()
+      .select('*')
       .eq('name', 'Pope Updates')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -55,7 +52,7 @@ export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUp
   try {
     const { data, error } = await supabase
       .from('completed_clips')
-      .select()
+      .select('*')
       .eq('name', 'Pope Updates')
       .order('created_at', { ascending: false })
       .range(page * limit + 1, (page + 1) * limit);
