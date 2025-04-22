@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background: 248 249 250;
+  --color-text: 51 51 51;
+}
+
+.dark {
+  --color-background: 30 30 30;
+  --color-text: 241 241 241;
+}
+
+body {
+  @apply bg-[rgb(var(--color-background))] text-[rgb(var(--color-text))];
+  font-family: 'Work Sans', sans-serif;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cormorant Garamond', serif;
+  line-height: 1.2;
+}
+
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.animate-on-scroll.active {
+  animation: fadeUp 0.7s ease-out forwards;
+}
+
+@keyframes fadeUp {
+  0% { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.audio-player {
+  @apply rounded-md p-4 shadow-lg transition-all duration-300;
+}
+
+.audio-player:hover {
+  @apply shadow-xl;
+}
+
+.wave-container {
+  @apply cursor-pointer rounded overflow-hidden h-24 my-2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .wave-container {
+    height: 64px;
+  }
+}
