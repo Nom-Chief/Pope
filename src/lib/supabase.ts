@@ -5,21 +5,43 @@ import type { Database } from '../types/supabase';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('Supabase URL:', supabaseUrl);
+console.log('Supabase Anon Key:', supabaseAnonKey ? 'Present' : 'Missing');
+
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
+// Test the connection
+supabase.auth.getSession().then(({ data: { session }, error }) => {
+  if (error) {
+    console.error('Supabase connection error:', error);
+  } else {
+    console.log('Supabase connection successful');
+    console.log('Session:', session ? 'Active' : 'No active session');
+  }
+});
+
 export type PopeUpdate = Database['public']['Tables']['completed_clips']['Row'];
 
 function formatAudioUrl(url: string): string {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${supabaseUrl}/storage/v1/object/public/audio-clips/${url}`;
+  if (!url) {
+    console.warn('Empty audio URL provided');
+    return '';
+  }
+  if (url.startsWith('http')) {
+    console.log('Using full URL:', url);
+    return url;
+  }
+  const formattedUrl = `${supabaseUrl}/storage/v1/object/public/audio-clips/${url}`;
+  console.log('Formatted audio URL:', formattedUrl);
+  return formattedUrl;
 }
 
 export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
+  console.log('Fetching latest update...');
   try {
     const { data, error } = await supabase
       .from('completed_clips')
@@ -34,13 +56,18 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
       return null;
     }
 
+    console.log('Latest update data:', data);
+
     if (data) {
-      return {
+      const formattedData = {
         ...data,
         audio_url: formatAudioUrl(data.audio_url)
       };
+      console.log('Formatted latest update:', formattedData);
+      return formattedData;
     }
 
+    console.log('No latest update found');
     return null;
   } catch (error) {
     console.error('Error fetching latest update:', error);
@@ -49,6 +76,7 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
 }
 
 export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUpdate[]> {
+  console.log(`Fetching previous updates - Page: ${page}, Limit: ${limit}`);
   try {
     const { data, error } = await supabase
       .from('completed_clips')
@@ -62,10 +90,15 @@ export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUp
       return [];
     }
 
-    return (data || []).map(update => ({
+    console.log('Previous updates data:', data);
+
+    const formattedData = (data || []).map(update => ({
       ...update,
       audio_url: formatAudioUrl(update.audio_url)
     }));
+    
+    console.log('Formatted previous updates:', formattedData);
+    return formattedData;
   } catch (error) {
     console.error('Error fetching previous updates:', error);
     return [];
