@@ -12,7 +12,19 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Initialize Supabase with explicit options for anonymous access
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'x-application-name': 'pope-updates'
+    }
+  }
+});
 
 // Test the connection and check table contents
 supabase.auth.getSession().then(({ data: { session }, error }) => {
