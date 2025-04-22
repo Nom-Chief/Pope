@@ -14,13 +14,38 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-// Test the connection
+// Test the connection and check table contents
 supabase.auth.getSession().then(({ data: { session }, error }) => {
   if (error) {
     console.error('Supabase connection error:', error);
   } else {
     console.log('Supabase connection successful');
     console.log('Session:', session ? 'Active' : 'No active session');
+    
+    // Check if table exists and has any data
+    supabase
+      .from('completed_clips')
+      .select('count')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error checking table:', error);
+        } else {
+          console.log('Total records in completed_clips:', data);
+        }
+      });
+
+    // Check for any records with the name 'Pope Updates'
+    supabase
+      .from('completed_clips')
+      .select('*')
+      .eq('name', 'Pope Updates')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error checking for Pope Updates:', error);
+        } else {
+          console.log('Records with name "Pope Updates":', data);
+        }
+      });
   }
 });
 
@@ -43,7 +68,8 @@ function formatAudioUrl(url: string): string {
 export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
   console.log('Fetching latest update...');
   try {
-    const { data, error } = await supabase
+    // First try with exact name match
+    let { data, error } = await supabase
       .from('completed_clips')
       .select('*')
       .eq('name', 'Pope Updates')
@@ -54,6 +80,24 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
     if (error) {
       console.error('Error fetching latest update:', error);
       return null;
+    }
+
+    // If no exact match, try case-insensitive search
+    if (!data) {
+      console.log('No exact match found, trying case-insensitive search...');
+      const { data: caseInsensitiveData, error: caseError } = await supabase
+        .from('completed_clips')
+        .select('*')
+        .ilike('name', '%pope%updates%')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (caseError) {
+        console.error('Error in case-insensitive search:', caseError);
+        return null;
+      }
+      data = caseInsensitiveData;
     }
 
     console.log('Latest update data:', data);
@@ -78,7 +122,8 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
 export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUpdate[]> {
   console.log(`Fetching previous updates - Page: ${page}, Limit: ${limit}`);
   try {
-    const { data, error } = await supabase
+    // First try with exact name match
+    let { data, error } = await supabase
       .from('completed_clips')
       .select('*')
       .eq('name', 'Pope Updates')
@@ -88,6 +133,23 @@ export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUp
     if (error) {
       console.error('Error fetching previous updates:', error);
       return [];
+    }
+
+    // If no exact matches, try case-insensitive search
+    if (!data || data.length === 0) {
+      console.log('No exact matches found, trying case-insensitive search...');
+      const { data: caseInsensitiveData, error: caseError } = await supabase
+        .from('completed_clips')
+        .select('*')
+        .ilike('name', '%pope%updates%')
+        .order('created_at', { ascending: false })
+        .range(page * limit + 1, (page + 1) * limit);
+
+      if (caseError) {
+        console.error('Error in case-insensitive search:', caseError);
+        return [];
+      }
+      data = caseInsensitiveData;
     }
 
     console.log('Previous updates data:', data);
