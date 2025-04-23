@@ -77,14 +77,16 @@ function formatAudioUrl(url: string): string {
   return formattedUrl;
 }
 
-export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
+export async function fetchLatestUpdate(language: 'en' | 'es' = 'en'): Promise<PopeUpdate | null> {
   console.log('Fetching latest update...');
   try {
+    const name = language === 'en' ? 'Pope Updates' : 'Spanish Pope Updates';
+    
     // First try with exact name match
     let { data, error } = await supabase
       .from('completed_clips')
       .select('*')
-      .eq('name', 'Pope Updates')
+      .eq('name', name)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -100,7 +102,7 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
       const { data: caseInsensitiveData, error: caseError } = await supabase
         .from('completed_clips')
         .select('*')
-        .ilike('name', '%pope%updates%')
+        .ilike('name', `%${language === 'en' ? 'pope' : 'spanish pope'}%updates%`)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -131,14 +133,16 @@ export async function fetchLatestUpdate(): Promise<PopeUpdate | null> {
   }
 }
 
-export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUpdate[]> {
+export async function fetchPreviousUpdates(limit = 10, page = 0, language: 'en' | 'es' = 'en'): Promise<PopeUpdate[]> {
   console.log(`Fetching previous updates - Page: ${page}, Limit: ${limit}`);
   try {
+    const name = language === 'en' ? 'Pope Updates' : 'Spanish Pope Updates';
+    
     // First try with exact name match
     let { data, error } = await supabase
       .from('completed_clips')
       .select('*')
-      .eq('name', 'Pope Updates')
+      .eq('name', name)
       .order('created_at', { ascending: false })
       .range(page * limit + 1, (page + 1) * limit);
 
@@ -153,7 +157,7 @@ export async function fetchPreviousUpdates(limit = 10, page = 0): Promise<PopeUp
       const { data: caseInsensitiveData, error: caseError } = await supabase
         .from('completed_clips')
         .select('*')
-        .ilike('name', '%pope%updates%')
+        .ilike('name', `%${language === 'en' ? 'pope' : 'spanish pope'}%updates%`)
         .order('created_at', { ascending: false })
         .range(page * limit + 1, (page + 1) * limit);
 

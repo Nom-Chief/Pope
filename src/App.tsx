@@ -13,6 +13,10 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [language, setLanguage] = useState<'en' | 'es'>(() => {
+    const savedLanguage = localStorage.getItem('language');
+    return (savedLanguage === 'en' || savedLanguage === 'es') ? savedLanguage : 'en';
+  });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -26,6 +30,12 @@ function App() {
     });
   };
 
+  const handleLanguageChange = (lang: 'en' | 'es') => {
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+    loadData();
+  };
+
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDarkMode);
   }, [isDarkMode]);
@@ -34,10 +44,10 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const latest = await fetchLatestUpdate();
+      const latest = await fetchLatestUpdate(language);
       setLatestUpdate(latest);
       
-      const previous = await fetchPreviousUpdates(5, 0);
+      const previous = await fetchPreviousUpdates(5, 0, language);
       setPreviousUpdates(previous);
       setHasMore(previous.length === 5);
       setPage(0);
@@ -52,7 +62,7 @@ function App() {
   const loadMoreUpdates = async () => {
     try {
       const nextPage = page + 1;
-      const more = await fetchPreviousUpdates(5, nextPage);
+      const more = await fetchPreviousUpdates(5, nextPage, language);
       
       if (more.length > 0) {
         setPreviousUpdates(prev => [...prev, ...more]);
@@ -74,28 +84,33 @@ function App() {
     }, 15 * 60 * 1000);
     
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [language]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+      <Header 
+        toggleTheme={toggleTheme} 
+        isDarkMode={isDarkMode} 
+        language={language}
+        onLanguageChange={handleLanguageChange}
+      />
       
       <main className="flex-grow">
-        <HeroSection isDarkMode={isDarkMode} />
+        <HeroSection isDarkMode={isDarkMode} language={language} />
 
         <section id="latest" className="py-8">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl md:text-3xl font-serif font-bold text-navy-500 dark:text-gray-50">
-                Latest Update
+                {language === 'en' ? 'Latest Update' : 'Última Actualización'}
               </h2>
               <button 
                 onClick={loadData}
                 className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-navy-700 transition-colors duration-200 flex items-center"
-                aria-label="Refresh updates"
+                aria-label={language === 'en' ? "Refresh updates" : "Actualizar"}
               >
                 <RefreshCw size={16} className={`${isLoading ? 'animate-spin' : ''}`} />
-                <span className="ml-2 hidden sm:inline">Refresh</span>
+                <span className="ml-2 hidden sm:inline">{language === 'en' ? 'Refresh' : 'Actualizar'}</span>
               </button>
             </div>
 
@@ -118,10 +133,11 @@ function App() {
                 audioUrl={latestUpdate.audio_url}
                 isLatest={true}
                 isDarkMode={isDarkMode}
+                language={language}
               />
             ) : (
               <div className="text-center py-8 text-navy-500 dark:text-gray-200">
-                No updates available at this time.
+                {language === 'en' ? 'No updates available at this time.' : 'No hay actualizaciones disponibles en este momento.'}
               </div>
             )}
           </div>
@@ -130,7 +146,7 @@ function App() {
         <section id="archive" className="py-12 bg-gray-50 dark:bg-navy-800">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-vatican-red-600 dark:text-vatican-gold-300 mb-10">
-              Previous Updates
+              {language === 'en' ? 'Previous Updates' : 'Actualizaciones Anteriores'}
             </h2>
 
             {previousUpdates.length > 0 ? (
@@ -144,6 +160,7 @@ function App() {
                     createdAt={update.created_at}
                     audioUrl={update.audio_url}
                     isDarkMode={isDarkMode}
+                    language={language}
                   />
                 ))}
 
@@ -157,7 +174,7 @@ function App() {
                           : 'bg-vatican-red-600 hover:bg-vatican-red-700 text-papal-white-100'
                       } transition-colors duration-200`}
                     >
-                      <span>Load More</span>
+                      <span>{language === 'en' ? 'Load More' : 'Cargar Más'}</span>
                       <ChevronDown size={18} className="ml-2" />
                     </button>
                   </div>
@@ -165,7 +182,7 @@ function App() {
               </div>
             ) : (
               <div className="text-center py-12 text-papal-white-600 dark:text-papal-white-400">
-                No previous updates available.
+                {language === 'en' ? 'No previous updates available.' : 'No hay actualizaciones anteriores disponibles.'}
               </div>
             )}
           </div>

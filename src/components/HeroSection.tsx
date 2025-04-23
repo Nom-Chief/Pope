@@ -3,9 +3,10 @@ import { ArrowDown } from 'lucide-react';
 
 interface HeroSectionProps {
   isDarkMode: boolean;
+  language: 'en' | 'es';
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ isDarkMode }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ isDarkMode, language }) => {
   const scrollToLatest = () => {
     const latestSection = document.getElementById('latest');
     if (latestSection) {
@@ -27,10 +28,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isDarkMode }) => {
       <div className="relative z-10 text-center px-4">
         <div className="inline-block bg-white/30 dark:bg-white/10 backdrop-blur-sm px-8 py-6 rounded-2xl shadow-lg">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-navy-500 dark:text-gray-50 mb-3 drop-shadow-[0_4px_3px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_4px_3px_rgba(0,0,0,0.5)]">
-            Papal Updates
+            {language === 'en' ? 'Papal Updates' : 'Actualizaciones Papales'}
           </h1>
           <p className="text-lg md:text-xl text-navy-400 dark:text-gray-300 max-w-2xl mx-auto drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)] dark:drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">
-            Stay informed with the latest updates from the Vatican
+            {language === 'en' 
+              ? 'Stay informed with the latest updates from the Vatican'
+              : 'Manténgase informado con las últimas actualizaciones del Vaticano'}
           </p>
         </div>
       </div>
@@ -39,7 +42,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isDarkMode }) => {
         <button
           onClick={scrollToLatest}
           className="p-1.5 rounded-full bg-gray-50/50 dark:bg-navy-800/50 hover:bg-gray-100 dark:hover:bg-navy-700 transition-colors duration-200"
-          aria-label="Scroll to latest updates"
+          aria-label={language === 'en' ? "Scroll to latest updates" : "Desplazarse a las últimas actualizaciones"}
         >
           <ArrowDown size={20} className="text-navy-500 dark:text-gray-200" />
         </button>

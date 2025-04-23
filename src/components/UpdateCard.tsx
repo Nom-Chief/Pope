@@ -11,6 +11,7 @@ interface UpdateCardProps {
   audioUrl: string;
   isLatest?: boolean;
   isDarkMode: boolean;
+  language: 'en' | 'es';
 }
 
 const UpdateCard: React.FC<UpdateCardProps> = ({ 
@@ -20,7 +21,8 @@ const UpdateCard: React.FC<UpdateCardProps> = ({
   createdAt, 
   audioUrl, 
   isLatest = false,
-  isDarkMode
+  isDarkMode,
+  language
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -66,7 +68,7 @@ const UpdateCard: React.FC<UpdateCardProps> = ({
     >
       {isLatest && (
         <div className="inline-block px-3 py-1 mb-4 text-xs font-medium bg-vatican-gold-100 dark:bg-vatican-red-900 text-vatican-gold-800 dark:text-vatican-gold-300 rounded-full">
-          Latest Update
+          {language === 'en' ? 'Latest Update' : 'Última Actualización'}
         </div>
       )}
 
